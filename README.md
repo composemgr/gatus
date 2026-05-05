@@ -47,8 +47,8 @@ See `docker-compose.yaml` for complete list of configurable options.
 
 ## 📂 Volumes
 
-- `./rootfs/config/gatus` - Data storage
-- `./rootfs/data/gatus` - Data storage
+- `./volumes/config/gatus` - Data storage
+- `./volumes/data/gatus` - Data storage
 
 ## 🔍 Logging
 
