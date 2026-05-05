@@ -21,8 +21,8 @@ services:
       PUID: ${SERVICE_USER:-1000}
       PGID: ${SERVICE_GROUP:-1000}
     volumes:
-      - ./rootfs/config/gatus:/config
-      - ./rootfs/data/gatus:/data
+      - ./volumes/config/gatus:/config
+      - ./volumes/data/gatus:/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8099"]
       interval: 30s
