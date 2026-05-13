@@ -16,10 +16,14 @@ services:
     logging: *default-logging
     networks:
       - gatus
+      - proxy
+      - cloudflare
     ports:
       - "172.17.0.1:8099:8080"
     environment:
       TZ: ${TZ:-America/New_York}
+      CONTAINER_NAME: gatus-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
     volumes:
       - ./volumes/config/gatus:/config
       - ./volumes/data/gatus:/data
@@ -28,8 +32,28 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    labels:
+      - 'traefik.enable=true'
+      - 'cloudflare.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'cloudflare.service=http://gatus-app:8080'
+      - 'cloudflare.hostname=gatus.${CLOUDFLARE_ZONE_NAME:-}'
+      - 'traefik.http.routers.gatus-app.entrypoints=http'
+      - 'traefik.http.routers.gatus-app-secure.tls=true'
+      - 'traefik.http.routers.gatus-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.middlewares.gatus-app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.gatus-app.middlewares=gatus-app-https-redirect'
+      - 'traefik.http.routers.gatus-app-secure.entrypoints=https'
+      - 'traefik.http.routers.gatus-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.routers.gatus-app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.gatus-app-secure.service=gatus-app'
+      - 'traefik.http.services.gatus-app.loadbalancer.server.port=8080'
 
 networks:
   gatus:
     name: gatus
     external: false
+  proxy:
+    external: true
+  cloudflare:
+    external: true
